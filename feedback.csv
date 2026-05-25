@@ -2,3 +2,8 @@ timestamp,entered_ingredients,recommended_meal,feedback_type,region
 2026-05-25T10:24:24,"rice,tomatoes,pepper, chicken, beef,garri,onions, egusi",Egusi Soup,like,Not specified
 2026-05-25T10:24:34,"rice,tomatoes,pepper, chicken, beef,garri,onions, egusi",Egusi Soup,like,Not specified
 2026-05-25T10:24:54,"rice,tomatoes,pepper, chicken, beef,garri,onions, egusi",White Rice,like,Not specified
+2026-05-25T10:31:26,"beans, oil, egg, garri, water, maggi",Egg Sauce,like,Not specified
+2026-05-25T10:31:28,"beans, oil, egg, garri, water, maggi",Egg Sauce,cooked,Not specified
+2026-05-25T10:31:31,"beans, oil, egg, garri, water, maggi",Porridge Beans,like,Nationwide
+2026-05-25T10:31:38,"beans, oil, egg, garri, water, maggi",Salad,not_suitable,Not specified
+2026-05-25T10:31:44,"beans, oil, egg, garri, water, maggi",Akara,like,Nationwide

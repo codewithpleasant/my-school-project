@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+    <section class="intro" aria-labelledby="login-title">
+        <div class="eyebrow">Saved preferences</div>
+        <h1 id="login-title">Log in</h1>
+        <p class="muted">
+            Your account keeps your feedback, favorite ingredients, disliked
+            ingredients, and region preferences separate from every other user.
+        </p>
+        <p class="muted">Demo account: username <strong>demo</strong>, password <strong>demo123</strong>.</p>
+    </section>
+
+    <section class="panel panel-pad" aria-label="Login form">
+        <form class="form-grid" method="post" action="{{ url_for('login') }}">
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" autocomplete="username" required>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required>
+            </div>
+            <button class="primary-button" type="submit">Log in</button>
+            <p class="muted">New here? <a href="{{ url_for('register') }}">Create an account</a>.</p>
+        </form>
+    </section>
+</div>
+{% endblock %}

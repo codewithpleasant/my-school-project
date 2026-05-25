@@ -1,4 +1,3 @@
-from datetime import datetime
 from pathlib import Path
 import csv
 import re
@@ -6,6 +5,8 @@ import re
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+
+import database
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -162,7 +163,7 @@ class MealRecommender:
         self.meal_vectors = self.vectorizer.fit_transform(self.data["training_text"])
         ensure_feedback_file()
 
-    def recommend(self, ingredients_text, top_n=5):
+    def recommend(self, ingredients_text, user=None, top_n=5):
         user_ingredients = normalize_user_ingredients(ingredients_text)
 
         if not user_ingredients:
@@ -172,14 +173,18 @@ class MealRecommender:
         user_text = " ".join(expanded_ingredients)
         user_vector = self.vectorizer.transform([user_text])
         similarities = cosine_similarity(user_vector, self.meal_vectors).flatten()
-        feedback_scores = self._feedback_scores()
+        feedback_scores = self._feedback_scores(user["id"] if user else None)
 
         recommendations = []
         for index, row in self.data.iterrows():
             meal = row["Meal_name"]
             base_score = float(similarities[index])
             feedback_adjustment = feedback_scores.get(meal, 0.0)
-            final_score = max(0.0, min(1.0, base_score + feedback_adjustment))
+            preference_adjustment = self._preference_adjustment(row, user)
+            final_score = max(
+                0.0,
+                min(1.0, base_score + feedback_adjustment + preference_adjustment),
+            )
 
             if final_score <= 0:
                 continue
@@ -195,6 +200,7 @@ class MealRecommender:
                     "match_percent": round(final_score * 100),
                     "base_match_percent": round(base_score * 100),
                     "feedback_adjustment": round(feedback_adjustment * 100, 1),
+                    "preference_adjustment": round(preference_adjustment * 100, 1),
                     "matched_ingredients": matched_ingredients,
                 }
             )
@@ -206,41 +212,67 @@ class MealRecommender:
 
         return recommendations[:top_n]
 
-    def save_feedback(self, ingredients_text, meal, feedback_type, region):
+    def save_feedback(self, user_id, ingredients_text, meal, feedback_type, region):
         if feedback_type not in FEEDBACK_WEIGHTS:
             raise ValueError("Invalid feedback type.")
 
-        ensure_feedback_file()
+        database.save_feedback(
+            user_id=user_id,
+            ingredients_text=ingredients_text,
+            meal=meal,
+            feedback_type=feedback_type,
+            region=region,
+        )
 
-        with FEEDBACK_FILE.open("a", newline="", encoding="utf-8") as file:
-            writer = csv.DictWriter(file, fieldnames=FEEDBACK_COLUMNS)
-            writer.writerow(
-                {
-                    "timestamp": datetime.now().isoformat(timespec="seconds"),
-                    "entered_ingredients": ingredients_text,
-                    "recommended_meal": meal,
-                    "feedback_type": feedback_type,
-                    "region": region,
-                }
-            )
+    def _feedback_scores(self, user_id):
+        feedback = database.get_feedback_rows(user_id)
 
-    def _feedback_scores(self):
-        ensure_feedback_file()
-        feedback = pd.read_csv(FEEDBACK_FILE).fillna("")
-
-        if feedback.empty:
+        if not feedback:
             return {}
 
         scores = {}
-        for meal, rows in feedback.groupby("recommended_meal"):
-            score = 0.0
-
-            for feedback_type in rows["feedback_type"]:
-                score += FEEDBACK_WEIGHTS.get(feedback_type, 0.0)
-
+        for row in feedback:
+            meal = row["recommended_meal"]
+            score = scores.get(meal, 0.0)
+            score += FEEDBACK_WEIGHTS.get(row["feedback_type"], 0.0)
             scores[meal] = max(-0.18, min(0.18, score))
 
         return scores
+
+    def _preference_adjustment(self, row, user):
+        if not user:
+            return 0.0
+
+        adjustment = 0.0
+        meal_text = build_training_text(row)
+        favorite_ingredients = expand_with_substitutes(
+            normalize_user_ingredients(user["favorite_ingredients"])
+        )
+        disliked_ingredients = expand_with_substitutes(
+            normalize_user_ingredients(user["disliked_ingredients"])
+        )
+        user_region = str(user["region"] or "").strip().lower()
+        meal_region = str(row["Region"] or "").strip().lower()
+
+        favorite_hits = sum(
+            1 for ingredient in favorite_ingredients
+            if ingredient and ingredient in meal_text
+        )
+        disliked_hits = sum(
+            1 for ingredient in disliked_ingredients
+            if ingredient and ingredient in meal_text
+        )
+
+        adjustment += min(0.06, favorite_hits * 0.015)
+        adjustment -= min(0.18, disliked_hits * 0.06)
+
+        if user_region and meal_region:
+            if user_region == meal_region:
+                adjustment += 0.03
+            elif meal_region == "nationwide":
+                adjustment += 0.015
+
+        return max(-0.22, min(0.12, adjustment))
 
     def _matched_ingredients(self, row, expanded_ingredients):
         matched = []

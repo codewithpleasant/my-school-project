@@ -6,7 +6,9 @@ It uses:
 
 - TF-IDF vectorization to convert meal ingredients into numeric features.
 - Cosine similarity to compare available ingredients with meals in the dataset.
-- Feedback learning to boost or reduce meal rankings over time.
+- Password-based user profiles stored in SQLite.
+- Feedback learning to boost or reduce meal rankings per user over time.
+- Saved profile preferences for region, dietary preference, favorite ingredients, and disliked ingredients.
 
 ## Setup
 
@@ -21,6 +23,16 @@ python app.py
 ```
 
 Open the local Flask URL shown in the terminal.
+
+The first run creates `meal_recommender.db` automatically. Existing rows in
+`feedback.csv` are imported into a default demo account once.
+
+Demo login:
+
+```text
+username: demo
+password: demo123
+```
 
 ## Run the terminal version
 

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+    <section class="intro" aria-labelledby="register-title">
+        <div class="eyebrow">Personal ML profile</div>
+        <h1 id="register-title">Create account</h1>
+        <p class="muted">
+            These profile details help the recommender learn your taste without mixing
+            your history with another user.
+        </p>
+    </section>
+
+    <section class="panel panel-pad" aria-label="Registration form">
+        <form class="form-grid" method="post" action="{{ url_for('register') }}">
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" autocomplete="username" required>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="new-password" required>
+            </div>
+            <div class="field">
+                <label for="confirm_password">Confirm password</label>
+                <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required>
+            </div>
+            <div class="field">
+                <label for="full_name">Full name</label>
+                <input id="full_name" name="full_name" type="text">
+            </div>
+            <div class="field">
+                <label for="region">Region</label>
+                <input id="region" name="region" type="text" placeholder="Nationwide, Southern, Northern">
+            </div>
+            <div class="field">
+                <label for="dietary_preference">Dietary preference</label>
+                <input id="dietary_preference" name="dietary_preference" type="text" placeholder="Vegetarian, high protein, no seafood">
+            </div>
+            <div class="field">
+                <label for="favorite_ingredients">Favorite ingredients</label>
+                <input id="favorite_ingredients" name="favorite_ingredients" type="text" placeholder="rice, chicken, plantain">
+                <div class="helper">Separate each ingredient with a comma.</div>
+            </div>
+            <div class="field">
+                <label for="disliked_ingredients">Disliked ingredients</label>
+                <input id="disliked_ingredients" name="disliked_ingredients" type="text" placeholder="beans, fish">
+            </div>
+            <button class="primary-button" type="submit">Create account</button>
+            <p class="muted">Already have one? <a href="{{ url_for('login') }}">Log in</a>.</p>
+        </form>
+    </section>
+</div>
+{% endblock %}

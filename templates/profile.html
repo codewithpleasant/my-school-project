@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+    <section class="intro" aria-labelledby="profile-title">
+        <div class="eyebrow">Preference tuning</div>
+        <h1 id="profile-title">Your profile</h1>
+        <p class="muted">
+            Favorite ingredients give meals a small boost. Disliked ingredients reduce
+            matches so the system learns what to avoid for this account.
+        </p>
+    </section>
+
+    <section class="panel panel-pad" aria-label="Profile form">
+        <form class="form-grid" method="post" action="{{ url_for('profile') }}">
+            <div class="field">
+                <label for="full_name">Full name</label>
+                <input id="full_name" name="full_name" type="text" value="{{ user.full_name }}">
+            </div>
+            <div class="field">
+                <label for="region">Region</label>
+                <input id="region" name="region" type="text" value="{{ user.region }}">
+            </div>
+            <div class="field">
+                <label for="dietary_preference">Dietary preference</label>
+                <input id="dietary_preference" name="dietary_preference" type="text" value="{{ user.dietary_preference }}">
+                <div class="helper">Stored for the profile; strict filtering can be added when rules are defined.</div>
+            </div>
+            <div class="field">
+                <label for="favorite_ingredients">Favorite ingredients</label>
+                <input id="favorite_ingredients" name="favorite_ingredients" type="text" value="{{ user.favorite_ingredients }}">
+            </div>
+            <div class="field">
+                <label for="disliked_ingredients">Disliked ingredients</label>
+                <input id="disliked_ingredients" name="disliked_ingredients" type="text" value="{{ user.disliked_ingredients }}">
+            </div>
+            <button class="primary-button" type="submit">Save profile</button>
+        </form>
+    </section>
+</div>
+{% endblock %}
